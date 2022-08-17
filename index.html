@@ -1,0 +1,164 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="aframe-environment-component.js"></script>
+<!--  <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script> -->
+
+    <link rel="stylesheet" href="fade.css">
+    <style>
+        body {
+
+        text-align: center;
+
+        }
+
+      .texto {
+        position: relative;
+        top: 50%;
+        text-align: center;
+        transform: translateY(-50%);
+        z-index: 999;
+      }
+
+.word {
+  margin: 10%;
+  color: white;
+  font: 700 normal 2.5em 'tahoma';
+  text-shadow: 5px 2px #222324, 2px 4px #222324, 3px 5px #222324;
+}
+      </style>
+    <script>
+      /*none, default, contact, egypt, checkerboard, forest, goaland, yavapai, goldmine, threetowers, poison, arches, tron, japan, dream, volcano, starry, osiris*/
+      
+          var env = ["none", "default", "contact", "egypt", "checkerboard", "forest", "goaland", "yavapai", "goldmine", "threetowers", "poison", "arches", "tron", "japan", "dream", "volcano", "starry", "osiris"];
+          env = ["egypt", "forest", "yavapai", "arches", "volcano", "starry", "osiris"];
+          var currEnv = 0;
+      
+          function changeEnv(){
+            
+            var environment = "preset: @@env@@;";
+            var currenvironment = environment.replace("@@env@@", env[currEnv++]);
+            if(currEnv >= env.length){
+              currEnv = 0;
+            }
+            document.getElementById("envtag").setAttribute("environment", currenvironment);
+            console.log("Clik: " +currenvironment);
+          }
+
+    </script>
+      
+  </head>
+  <body>
+    <div class="texto word">
+      <h1 id="txtshow">
+       <span class="fade-in">  </span>
+     </h1>
+    </div>
+    <a-scene>
+         
+      </a-sky>
+      
+      <!-- Out of the box environment! -->
+      <a-entity id="envtag" environment="preset: custom; ground: hills; skyType: atmosphere"> </a-entity>
+      <a-entity id="cam" look-controls wasd-controls camera  position="8 10 0"></a-entity>
+
+		  <a-box id="boxtest" position="-1 1.6 -10" color="tomato" 
+	  rotation="0 0 0" 
+	  animation="property: opacity; to: 1; loop: true; dur: 3000"  
+	  ></a-box>
+      
+    </a-scene>
+
+    <script>
+
+	const CAMY = 6;
+
+	function fixSky(){
+		document.querySelectorAll('#envtag a-sky')[0].setAttribute("theta-length", 360);
+	}
+	fixSky();
+
+	const DAYSUN = 0.5;
+	const SUNSET = 0.03;
+	const NIGHTSUN = -0.1;
+	function moveSun(to, duration){
+		var curry = document.querySelectorAll('#envtag a-sky')[0].getAttribute("material").sunPosition.y;
+		var animation="property: material.sunPosition; to: 1 " + to + " 1; from: 1 "+curry+" 1; dur: " + duration + ";  easing: linear; loop: false; is-raw-property: true";
+		document.querySelectorAll('#envtag a-sky')[0].setAttribute("animation", animation);
+		document.getElementById("stars").setAttribute("visible", (to <= 0));
+	}
+	
+	
+	const BALLOONY = 40;
+	function toggleBalloon(){
+		const duration = 5000;
+		var curry = document.getElementById("cam").getAttribute("position").y;
+		console.log("cam y: " + curry);
+		var to = BALLOONY;
+		if(curry >= BALLOONY){
+			to = CAMY;
+		}
+		var animation="property: position; to: 1 " + to + " 1; from: 1 "+curry+" 1; dur: " + duration + ";  easing: linear; loop: false;";
+		document.getElementById("cam").setAttribute("animation", animation);
+		console.log("(curry >= BALLOONY): " + (curry >= BALLOONY));
+		
+		var animationb="property: visible; to: " + (curry >= BALLOONY) + "; delay: " + (duration * 0.7) + ";";
+		document.querySelectorAll('#envtag .environmentDressing')[0].setAttribute("animation", animationb);
+		document.querySelectorAll('#envtag .environmentGround')[0].setAttribute("animation", animationb);
+		
+		
+		
+		
+	}
+	
+
+	var texto = ["Acende a luz que é pra iluminar o quarto","Eu li teus textos 1 por 1 cada vez mais abstratos","Mar não tá pra peixe, o louco se jogou no couro","Tatuou no corpo a filha em cima escreveu socorro"];	
+
+
+
+
+
+var txtidx = 0;
+
+        document.onkeydown = function (event) {
+		if(txtidx >= texto.length){
+			txtidx = 0;	
+		}
+
+
+              console.log("press: " + event.keyCode);
+            if (Number(event.keyCode) == 81){ //q
+              document.getElementById("txtshow").classList.remove("fade-in");
+              document.getElementById("txtshow").innerHTML="<span class=\"fade-in\"> "+texto[txtidx++] + " </span>";
+              document.getElementById("txtshow").classList.add("fade-in");
+            } else if (Number(event.keyCode) == 80){ //p
+               moveSun(DAYSUN, 5000);
+            } else if (Number(event.keyCode) == 79){ //o
+               moveSun(SUNSET, 5000);
+            } else if (Number(event.keyCode) == 73){ //i
+               moveSun(NIGHTSUN, 8000);
+            } else if (Number(event.keyCode) == 66){ //b
+               toggleBalloon();
+            } else if (Number(event.keyCode) == 87 || Number(event.keyCode) == 83){ //w
+                var newPos = Number(document.getElementById("cam").getAttribute("position").y) + (Number(event.keyCode) - 85);
+               document.getElementById("cam").setAttribute("position", "8 " + newPos + " 0");
+            } /*else {
+              console.log("press: " + event.keyCode);
+              console.log("pos: " + document.getElementById("cam").getAttribute("position").y);
+              var newPos = Number(document.getElementById("cam").getAttribute("position").y) + (Number(event.keyCode) - 85);
+              document.getElementById("cam").setAttribute("position", "8 " + newPos + " 0");
+
+            }*/
+            
+        };
+      
+
+        </script>
+    </script>
+
+
+  </body>
+
+
+
+</html>
